@@ -1,5 +1,5 @@
 package com.example.firechat
 
 data class Chat(
-    val messages:List<String>,
+    val messages:String,
     val user:String)

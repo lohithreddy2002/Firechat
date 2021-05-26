@@ -34,11 +34,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firechat.ui.theme.FireChatTheme
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewmodel = viewmodel(repo())
+        val sdf = SimpleDateFormat("yyyy.MM.dd  HH:mm:ss")
+        val currentDateandTime: String = sdf.format(Date())
+        Log.e("time","${Date()}")
+        Log.e("time","${currentDateandTime}")
+
         setContent {
             FireChatTheme {
                 // A surface container using the 'background' color from the theme
@@ -65,31 +72,34 @@ fun UserImage(size:Dp){
     }
 
 @Composable
-fun Bubble(username:String,message:List<String>){
-    Surface(shape = RoundedCornerShape(20.dp),modifier = Modifier.padding(start = 10.dp,top=10.dp,end= 20.dp,bottom = 10.dp)) {
-        Row {
-        UserImage(48.dp)
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(verticalArrangement = Arrangement.SpaceAround) {
-                Text(text = username)
+fun Bubble(username:String,message:String){
+    var allign = Alignment.Start
+    if(username == "Lohith" ){
+        allign = Alignment.End
+    }
+    Surface(shape = RoundedCornerShape(20.dp),modifier = Modifier
+        .padding(start = 10.dp, top = 10.dp, end = 20.dp, bottom = 10.dp)
+        .fillMaxWidth()) {
+        Spacer(modifier = Modifier.width(10.dp))
+            Column(verticalArrangement = Arrangement.SpaceAround,horizontalAlignment = allign) {
+
 Spacer(modifier = Modifier.height(10.dp))
-                for(m in message) {
         Box(modifier = Modifier
             .clip(RoundedCornerShape(15.dp))
             .padding(2.dp)
             .background(color = Color.Red)) {
 
-                Text(text = m, modifier = Modifier.padding(10.dp))
+                Text(text = message, modifier = Modifier.padding(10.dp))
             }
-        }
+
 
         }
-    }}
+    }
 }
 
 
 @Composable
-fun MessagePane(list: List<Chat>,value:String,onvaluechange:(String)->Unit,viewmodel: viewmodel = viewModel()) {
+fun MessagePane(list: List<Chat>,viewmodel: viewmodel = viewModel()) {
 val listState  = rememberLazyListState()
     val co = rememberCoroutineScope()
     var enable = false
@@ -99,26 +109,24 @@ Surface(
         .fillMaxWidth()) {
     Column(verticalArrangement = Arrangement.SpaceEvenly) {
         LazyColumn(
-            reverseLayout = true,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(), state = listState
         ) {
             items(list) { data ->
                 Bubble(data.user, data.messages)
-                Log.d("123","$data")
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(value = value, onValueChange = onvaluechange,
+            OutlinedTextField(value = viewmodel.message.value, onValueChange = {viewmodel.onvaluechange(it)},
                 label = { Text(text = "enter the message") }, modifier = Modifier
                     .padding(10.dp)
                     .weight(1f)
             )
-            if(value != ""){
+            if(viewmodel.message.value != ""){
                 enable = true
             }
-            IconButton(onClick = { viewmodel.sendmessage(Chat(listOf(value),"Lohith"))},enabled =enable) {
+            IconButton(onClick = {viewmodel.sendmessage() },enabled =viewmodel.onemptymessage()) {
                 Icon(imageVector = Icons.Filled.Send, contentDescription = "send",tint = Color.Red,modifier = Modifier.size(50.dp))
             }
         }
@@ -133,7 +141,6 @@ fun MessageScreen(
     viewmode:viewmodel = viewModel()
 ){
     val items by viewmode.chat.observeAsState(initial = listOf())
-    var text by remember { mutableStateOf("")}
     Scaffold(
         topBar = {TopAppBar(
             content = {
@@ -157,7 +164,7 @@ fun MessageScreen(
                 }
             }
             else{
-            MessagePane(list = items, value = text, onvaluechange = { text = it }, viewmode)
+            MessagePane(list = items, viewmode)
         }
         }
     )
