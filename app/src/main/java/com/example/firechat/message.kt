@@ -10,6 +10,7 @@ data class Chat(
 
     val messages:String,
     val user:String,
+    val touserid:Int,
     val date:String,
     val timeinmills:Long
     ){

@@ -14,8 +14,8 @@ data class User(
 data class userwithmessages(
     @Embedded val user:User,
     @Relation(
-        parentColumn = "Name",
-        entityColumn = "user",
+        parentColumn = "userid",
+        entityColumn = "touserid",
     )
     val messages:List<Chat>
 )

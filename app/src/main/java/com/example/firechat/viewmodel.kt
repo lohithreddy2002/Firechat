@@ -44,14 +44,19 @@ class viewmodel(val repo:repo):ViewModel() {
             Calendar.HOUR_OF_DAY,
             Calendar.MINUTE
         )
+
+        val a = Chat(message.value.trim(),"Lohith",1,Calendar.DATE.toString(),cal.timeInMillis)
         viewModelScope.launch {
-            Log.d("messages", "${repo.getusermessages(1)}")
-        }
-        val a = Chat(message.value.trim(),"Lohith", Calendar.DATE.toString(),cal.timeInMillis)
-        viewModelScope.launch {
+            val user = repo.getuser("")
+            if(user==null){
+                repo.insertuser(User("",1))
+            }
             repo.sendmessage(a)
             onmessagesend()
-            repo.insertmessage(User("",1),a)
+            repo.insertmessage(a)
+        }
+        viewModelScope.launch {
+            Log.d("messages", "${repo.getusermessages(1)}")
         }
 
 //       col.add(
