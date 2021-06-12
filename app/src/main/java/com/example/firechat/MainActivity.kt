@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -35,21 +36,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.firechat.ui.theme.FireChatTheme
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewmodel = viewmodel(repo())
-        val sdf = SimpleDateFormat("yyyy.MM.dd  HH:mm:ss")
-        val currentDateandTime: String = sdf.format(Date())
-        Log.e("time","${Date()}")
-        Log.e("time","${currentDateandTime}")
-
+        val viewmodel = viewmodel(repo = repo(database(context = this)))
         setContent {
             FireChatTheme {
                 // A surface container using the 'background' color from the theme
-
                 Surface(color = MaterialTheme.colors.background) {
                     MessageScreen(viewmodel)
                 }
@@ -123,7 +119,7 @@ Surface(
                     .padding(10.dp)
                     .weight(1f)
             )
-            if(viewmodel.message.value != ""){
+            if(viewmodel.message.value.trim() != ""){
                 enable = true
             }
             IconButton(onClick = {viewmodel.sendmessage() },enabled =viewmodel.onemptymessage()) {
@@ -139,8 +135,9 @@ Surface(
 @Composable
 fun MessageScreen(
     viewmode:viewmodel = viewModel()
+
 ){
-    val items by viewmode.chat.observeAsState(initial = listOf())
+    val items = viewmode.chat.observeAsState(initial = listOf()).value
     Scaffold(
         topBar = {TopAppBar(
             content = {
@@ -173,7 +170,6 @@ fun MessageScreen(
 @Preview
 @Composable
 fun DefaultPreview() {
-
     FireChatTheme {
         MessageScreen()
     }

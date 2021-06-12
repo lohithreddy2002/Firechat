@@ -6,11 +6,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import java.util.*
 
 
 class viewmodel(val repo:repo):ViewModel() {
@@ -28,21 +25,33 @@ class viewmodel(val repo:repo):ViewModel() {
             _chat.postValue(a)
             Log.d("a","${a.size}")
             Log.d("asa","${chat.value}")
+
         }
     }
 
     val message = mutableStateOf("")
 
     fun onvaluechange(query:String){
-       this.message.value = query
+        this.message.value = query
     }
 
     fun sendmessage(){
-        val a = Chat(this.message.value,"Lohith")
+        val cal = Calendar.getInstance()
+        cal.set(
+            Calendar.YEAR,
+            Calendar.MONTH,
+            Calendar.DATE,
+            Calendar.HOUR_OF_DAY,
+            Calendar.MINUTE
+        )
+        viewModelScope.launch {
+            Log.d("messages", "${repo.getusermessages(1)}")
+        }
+        val a = Chat(message.value.trim(),"Lohith", Calendar.DATE.toString(),cal.timeInMillis)
         viewModelScope.launch {
             repo.sendmessage(a)
-            Log.d("asa","${_chat.value}")
             onmessagesend()
+            repo.insertmessage(User("",1),a)
         }
 
 //       col.add(
